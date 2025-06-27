@@ -7,49 +7,54 @@
   <style>
     body {
       font-family: sans-serif;
-      padding: 1rem;
       margin: 0;
-      background: #f9f9f9;
+      padding: 0;
+      background-color: #f2f2f2;
     }
 
     .container {
-      max-width: 500px;
+      width: 100%;
+      max-width: 600px;
       margin: auto;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 0 10px #ccc;
-      padding: 20px;
+      padding: 5vw;
+      box-sizing: border-box;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     h2 {
       text-align: center;
       color: #333;
+      font-size: 5vw;
     }
 
     label {
-      font-weight: bold;
-      margin-top: 1rem;
       display: block;
+      font-weight: bold;
+      margin-top: 20px;
+      font-size: 4vw;
     }
 
     input[type="password"] {
       width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      margin-bottom: 16px;
+      padding: 12px;
+      font-size: 4vw;
+      margin-top: 10px;
+      box-sizing: border-box;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 5px;
     }
 
     button {
       width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      font-size: 4.5vw;
       background-color: #007bff;
       color: white;
-      padding: 12px;
       border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
+      border-radius: 5px;
     }
 
     button:hover {
@@ -57,63 +62,48 @@
     }
 
     #result {
-      margin-top: 1.5rem;
-      word-break: break-word;
+      margin-top: 20px;
+      font-size: 4vw;
+      word-wrap: break-word;
       background: #eef;
-      padding: 10px;
-      border-left: 4px solid #007bff;
-      border-radius: 4px;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-
-      .container {
-        padding: 15px;
-      }
+      padding: 12px;
+      border-left: 5px solid #007bff;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>🔐 Giải mã dữ liệu</h2>
+    <h2>🔐 Giải mã QR</h2>
 
     <label for="key">Nhập khóa giải mã:</label>
-    <input type="password" id="key" placeholder="Mã bí mật của bạn" />
+    <input type="password" id="key" placeholder="Nhập mã khóa của bạn" />
 
     <button onclick="decrypt()">Giải mã</button>
 
     <div id="result"></div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script>
     function decrypt() {
       const key = document.getElementById("key").value;
       const encrypted = new URLSearchParams(window.location.search).get("data");
 
+      const resultEl = document.getElementById("result");
+
       if (!encrypted || !key) {
-        document.getElementById("result").innerText = "Thiếu dữ liệu hoặc khóa!";
+        resultEl.innerText = "⚠️ Thiếu dữ liệu hoặc khóa!";
         return;
       }
 
       try {
-        const decrypted = decryptAES(encrypted, key);
-        document.getElementById("result").innerText = decrypted;
+        const decrypted = CryptoJS.AES.decrypt(encrypted, key).toString(CryptoJS.enc.Utf8);
+        resultEl.innerText = decrypted || "⚠️ Khóa không hợp lệ hoặc dữ liệu sai!";
       } catch (e) {
-        document.getElementById("result").innerText = "❌ Giải mã thất bại: " + e.message;
+        resultEl.innerText = "❌ Giải mã thất bại: " + e.message;
       }
     }
-
-    function decryptAES(cipherText, password) {
-      // Dùng CryptoJS để giải mã
-      const decrypted = CryptoJS.AES.decrypt(cipherText, password);
-      return decrypted.toString(CryptoJS.enc.Utf8);
-    }
   </script>
-
-  <!-- CryptoJS CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </body>
 </html>
