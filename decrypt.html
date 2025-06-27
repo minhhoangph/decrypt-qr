@@ -41,7 +41,7 @@
     function decrypt() {
       const key = document.getElementById("key").value.trim();
       const data = new URLSearchParams(window.location.search).get("data");
-
+      data=decodeURIComponent(data);    
       const resultDiv = document.getElementById("result");
       if (!data || !key) {
         resultDiv.innerText = "⚠️ Vui lòng nhập đầy đủ dữ liệu và khóa.";
