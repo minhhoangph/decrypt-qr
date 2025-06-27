@@ -24,17 +24,14 @@
   <!-- Thư viện CryptoJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script>
-    // ✅ IV mặc định ẩn bên trong mã (phải giống bên C#)
-    const DEFAULT_IV = CryptoJS.enc.Utf8.parse("loinhovaodoi2025");
-
-    function decryptAES(cipherBase64, password) {
+     function decryptAES(cipherBase64, password) {
     try {
         // 🔑 Hash password bằng SHA256 rồi lấy 16 byte đầu (AES-128)
         const fullKey = CryptoJS.SHA256(password); // 256-bit
         const key = CryptoJS.lib.WordArray.create(fullKey.words.slice(0, 4)); // 128-bit (16 bytes)
 
         // 🔄 IV cố định
-        const iv = CryptoJS.enc.Utf8.parse("1234567890123456");
+        const iv = CryptoJS.enc.Utf8.parse("loinhovaodoi2025");
 
         // 📦 Giải mã
         const decrypted = CryptoJS.AES.decrypt(cipherBase64, key, {
