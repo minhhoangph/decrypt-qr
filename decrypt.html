@@ -17,7 +17,6 @@
     <h2>🔐 Giải mã AES</h2>
     <label for="key">Nhập key (16 ký tự):</label>
     <input type="text" id="key" placeholder="Nhập khóa giải mã">
-
     <button onclick="decrypt()">Giải mã</button>
     <div id="result"></div>
   </div>
@@ -35,7 +34,7 @@
         mode: CryptoJS.mode.CBC,
         padding: CryptoJS.pad.Pkcs7
       });
-      return decrypted.toString(CryptoJS.enc.Utf8);
+      return decrypted.toString();
     }
 
     function decrypt() {
