@@ -1,59 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Giải mã dữ liệu từ QR</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giải mã QR</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #f7f7f7; }
-    input, button { padding: 8px; margin: 5px 0; width: 100%; }
-    #output { background: #fff; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; margin-top: 10px; }
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+      margin: 0;
+      background: #f9f9f9;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #ccc;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 1rem;
+      display: block;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #result {
+      margin-top: 1.5rem;
+      word-break: break-word;
+      background: #eef;
+      padding: 10px;
+      border-left: 4px solid #007bff;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 15px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>🔐 Giải mã dữ liệu từ QR code</h2>
-  <p>Đã quét QR? Nhập khóa giải mã (AES-128) để xem nội dung.</p>
-  <input type="text" id="key" placeholder="Nhập khóa AES (16 ký tự)" />
-  <button onclick="decrypt()">🔓 Giải mã</button>
-  <pre id="output"></pre>
+  <div class="container">
+    <h2>🔐 Giải mã dữ liệu</h2>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <label for="key">Nhập khóa giải mã:</label>
+    <input type="password" id="key" placeholder="Mã bí mật của bạn" />
+
+    <button onclick="decrypt()">Giải mã</button>
+
+    <div id="result"></div>
+  </div>
+
   <script>
-    function getParam(name) {
-      const url = new URL(window.location.href);
-      return url.searchParams.get(name);
-    }
-
     function decrypt() {
-      const keyInput = document.getElementById("key").value;
-      if (!keyInput || keyInput.length < 8) {
-        alert("Vui lòng nhập khóa hợp lệ (tối thiểu 8 ký tự).");
-        return;
-      }
+      const key = document.getElementById("key").value;
+      const encrypted = new URLSearchParams(window.location.search).get("data");
 
-      const key = CryptoJS.enc.Utf8.parse(keyInput.padEnd(32, '0').substring(0, 32));
-      const data = getParam('data');
-      if (!data) {
-        document.getElementById("output").innerText = "Không tìm thấy dữ liệu trong đường dẫn (?data=...)";
+      if (!encrypted || !key) {
+        document.getElementById("result").innerText = "Thiếu dữ liệu hoặc khóa!";
         return;
       }
 
       try {
-        const raw = CryptoJS.enc.Base64.parse(data);
-        const iv = CryptoJS.lib.WordArray.create(raw.words.slice(0, 4)); // 16 byte đầu tiên = IV
-        const ciphertext = CryptoJS.lib.WordArray.create(raw.words.slice(4));
-
-        const decrypted = CryptoJS.AES.decrypt(
-          { ciphertext: ciphertext },
-          key,
-          { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
-        );
-
-        const result = decrypted.toString(CryptoJS.enc.Utf8);
-        document.getElementById("output").innerText = result || "❌ Không thể giải mã với khóa này.";
+        const decrypted = decryptAES(encrypted, key);
+        document.getElementById("result").innerText = decrypted;
       } catch (e) {
-        document.getElementById("output").innerText = "❌ Giải mã lỗi: " + e.message;
+        document.getElementById("result").innerText = "❌ Giải mã thất bại: " + e.message;
       }
     }
+
+    function decryptAES(cipherText, password) {
+      // Dùng CryptoJS để giải mã
+      const decrypted = CryptoJS.AES.decrypt(cipherText, password);
+      return decrypted.toString(CryptoJS.enc.Utf8);
+    }
   </script>
+
+  <!-- CryptoJS CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </body>
 </html>
