@@ -1,107 +1,58 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Giải mã QR</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giải mã AES</title>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f2f2f2;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 600px;
-      margin: auto;
-      padding: 5vw;
-      box-sizing: border-box;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      text-align: center;
-      color: #333;
-      font-size: 5vw;
-    }
-
-    label {
-      display: block;
-      font-weight: bold;
-      margin-top: 20px;
-      font-size: 4vw;
-    }
-
-    input[type="password"] {
-      width: 100%;
-      padding: 12px;
-      font-size: 4vw;
-      margin-top: 10px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 20px;
-      font-size: 4.5vw;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #result {
-      margin-top: 20px;
-      font-size: 4vw;
-      word-wrap: break-word;
-      background: #eef;
-      padding: 12px;
-      border-left: 5px solid #007bff;
-      border-radius: 5px;
-    }
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
+    h2 { text-align: center; }
+    input, button { width: 100%; padding: 10px; margin-top: 10px; box-sizing: border-box; font-size: 1em; }
+    #result { margin-top: 20px; background: #eef; padding: 10px; border-left: 4px solid #007bff; word-break: break-word; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>🔐 Giải mã QR</h2>
-
-    <label for="key">Nhập khóa giải mã:</label>
-    <input type="password" id="key" placeholder="Nhập mã khóa của bạn" />
+    <h2>🔐 Giải mã AES</h2>
+    <label for="key">Nhập key (16 ký tự):</label>
+    <input type="text" id="key" placeholder="Nhập khóa giải mã">
 
     <button onclick="decrypt()">Giải mã</button>
-
     <div id="result"></div>
   </div>
 
+  <!-- Thư viện CryptoJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script>
+    // ✅ IV mặc định ẩn bên trong mã (phải giống bên C#)
+    const DEFAULT_IV = CryptoJS.enc.Utf8.parse("loinhovaodoi2025");
+
+    function decryptAES(cipherText, keyStr) {
+      const key = CryptoJS.enc.Utf8.parse(keyStr);
+      const decrypted = CryptoJS.AES.decrypt(cipherText, key, {
+        iv: DEFAULT_IV,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7
+      });
+      return decrypted.toString(CryptoJS.enc.Utf8);
+    }
+
     function decrypt() {
-      const key = document.getElementById("key").value;
-      const encrypted = new URLSearchParams(window.location.search).get("data");
+      const key = document.getElementById("key").value.trim();
+      const data = new URLSearchParams(window.location.search).get("data");
 
-      const resultEl = document.getElementById("result");
-
-      if (!encrypted || !key) {
-        resultEl.innerText = "⚠️ Thiếu dữ liệu hoặc khóa!";
+      const resultDiv = document.getElementById("result");
+      if (!data || !key) {
+        resultDiv.innerText = "⚠️ Vui lòng nhập đầy đủ dữ liệu và khóa.";
         return;
       }
 
       try {
-        const decrypted = CryptoJS.AES.decrypt(encrypted, key).toString(CryptoJS.enc.Utf8);
-        resultEl.innerText = decrypted || "⚠️ Khóa không hợp lệ hoặc dữ liệu sai!";
+        const decrypted = decryptAES(data, key);
+        resultDiv.innerText = decrypted || "⚠️ Khóa sai hoặc dữ liệu không hợp lệ!";
       } catch (e) {
-        resultEl.innerText = "❌ Giải mã thất bại: " + e.message;
+        resultDiv.innerText = "❌ Giải mã thất bại: " + e.message;
       }
     }
   </script>
